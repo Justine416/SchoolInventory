@@ -1,0 +1,161 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction History</title>
+    <style>
+
+       body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url("{% static 'item_images/img.png' %}");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #333;
+        }
+
+          /* Navigation styles */
+        nav {
+            background-color: rgba(44, 62, 80, 0.9);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            text-align: center;
+        }
+
+        nav ul li {
+            display: inline-block;
+            margin-right: 20px;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
+            padding: 12px 18px;
+            border-radius: 5px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        nav ul li a:hover {
+            background-color: #3498db;
+            transform: scale(1.1);
+
+        }
+
+          a:hover {
+            transform: scale(1.05); /* Slight zoom effect for links */
+            color: #f39c12; /* Coral on hover */
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        table th, table td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        table th {
+            background-color: coral;
+            color: white;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        table tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Back to inventory link styling */
+        a {
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 18px;
+            text-align: center;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+        }
+
+        a:hover {
+            background-color: coral;
+        }
+
+    </style>
+</head>
+<body>
+ <nav>
+         <ul>
+            <li><a href="{% url 'home' %}">Home</a></li>
+            <li><a href="{% url 'inventory' %}">View Inventory</a></li>
+            <li><a href="{% url 'add_item' %}">Add Item</a></li>
+            <li><a href="{% url 'transaction_list' %}">Transaction</a></li>
+            <li><a href="{% url 'manage_inventory' %}">Manage Inventory</a></li>
+            <li><a href="{% url 'take_item' %}?action=take">Take Item</a></li>
+            <li><a href="{% url 'return_item' %}?action=return">Return Item</a></li>
+        </ul>
+    </nav>
+
+    <h1>Transaction History</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Item</th>
+                <th>Action</th>
+                <th>Quantity</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in transactions %}
+                <tr>
+                    <td>{{ transaction.user_name }}</td>
+                    <td>{{ transaction.item.name }}</td>
+                    <td>{{ transaction.get_action_display }}</td>
+                    <td>{{ transaction.quantity }}</td>
+                    <td>{{ transaction.date }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5">No transactions found.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{% url 'inventory' %}">Back to Inventory</a>
+
+    <script src="{% static 'js/inventory.js' %}"></script>
+    <script src="{% static 'js/events.js' %}"></script>
+</body>
+</html>

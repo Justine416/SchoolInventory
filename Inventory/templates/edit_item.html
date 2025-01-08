@@ -1,0 +1,178 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Item</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #FF6F61;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-image: url("{% static 'item_images/img.png' %}");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        nav {
+            background-color: rgba(44, 62, 80, 0.9);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            text-align: center;
+        }
+
+        nav ul li {
+            display: inline-block;
+            margin-right: 20px;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
+            padding: 12px 18px;
+            border-radius: 5px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        nav ul li a:hover {
+            background-color: #3498db; /* Light blue on hover */
+            transform: scale(1.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #fff;
+            font-size: 2.5em;
+            margin-top: 40px;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        form {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            margin: 30px auto;
+        }
+
+        form div {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 1.2em;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        button, a {
+            padding: 10px 20px;
+            font-size: 1em;
+            text-align: center;
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+        }
+
+        button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        a {
+            background-color: #FF6347;
+            color: white;
+            margin-left: 20px;
+        }
+
+        a:hover {
+            background-color: #FF4500;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            form {
+                padding: 20px;
+                width: 90%;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            label {
+                font-size: 1em;
+            }
+
+            input[type="text"], input[type="number"] {
+                font-size: 0.9em;
+            }
+        }
+    </style>
+    <script>
+        function confirmSubmission(event) {
+            event.preventDefault();
+            const userConfirmed = confirm("Are you sure you want to save the changes?");
+            if (userConfirmed) {
+                // Submit the form
+                document.querySelector("form").submit();
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Edit Item</h1>
+
+    <form method="post" onsubmit="confirmSubmission(event)">
+        {% csrf_token %}
+        <div>
+            <label for="name">Item Name:</label>
+            <input type="text" id="name" name="name" value="{{ item.name }}" required>
+        </div>
+        <div>
+            <label for="description">Description:</label>
+            <input type="text" id="description" name="description" value="{{ item.description }}" required>
+        </div>
+        <div>
+            <label for="count">Quantity:</label>
+            <input type="number" id="count" name="count" value="{{ item.count }}" required>
+        </div>
+        <button type="submit">Save Changes</button>
+        <a href="{% url 'manage_inventory' %}">Cancel</a>
+    </form>
+</body>
+</html>

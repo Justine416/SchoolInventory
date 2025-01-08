@@ -1,0 +1,165 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>School Inventory - Dashboard</title>
+    <style>
+        /* Global styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url("{% static 'item_images/img.png' %}");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #333;
+        }
+
+        h1 {
+            background-color: rgba(255, 140, 0, 0.8);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+            font-size: 2.8em;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Navigation styles */
+        nav {
+            background-color: rgba(44, 62, 80, 0.9);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            text-align: center;
+        }
+
+        nav ul li {
+            display: inline-block;
+            margin-right: 20px;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
+            padding: 12px 18px;
+            border-radius: 5px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        nav ul li a:hover {
+            background-color: #3498db; /* Light blue on hover */
+            transform: scale(1.1);
+        }
+
+        /* Container for main content */
+        .container {
+            padding: 40px;
+            text-align: center;
+            background-color: rgba(255, 239, 186, 0.8); /* Soft light coral color */
+            border-radius: 12px;
+            margin-top: 40px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+            max-width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .container h2 {
+            font-size: 26px;
+            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin-top: 0;
+        }
+
+        .container p {
+            font-size: 18px;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        /* Footer styles */
+        footer {
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            text-align: center;
+            padding: 15px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        /* Added transition effect for smooth scrolling and interactions */
+        a {
+            transition: transform 0.2s ease, color 0.3s;
+        }
+
+        a:hover {
+            transform: scale(1.05); /* Slight zoom effect for links */
+            color: #f39c12; /* Coral on hover */
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em; /* Adjust header font size on smaller screens */
+            }
+
+            nav ul li a {
+                font-size: 14px;
+                padding: 8px 12px;
+            }
+
+            .container h2 {
+                font-size: 22px;
+            }
+
+            .container p {
+                font-size: 16px;
+            }
+
+            .container {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to the School Inventory System</h1>
+
+    <nav>
+        <ul>
+            <li><a href="{% url 'home' %}">Home</a></li>
+            <li><a href="{% url 'inventory' %}">View Inventory</a></li>
+            <li><a href="{% url 'add_item' %}">Add Item</a></li>
+            <li><a href="{% url 'transaction_list' %}">Transaction</a></li>
+            <li><a href="{% url 'manage_inventory' %}">Manage Inventory</a></li>
+            <li><a href="{% url 'take_item' %}?action=take">Take Item</a></li>
+            <li><a href="{% url 'return_item' %}?action=return">Return Item</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h2>Manage your school inventory with ease!</h2>
+        <p>Click the links above to manage your items, whether it's viewing, adding, or taking/returning items.</p>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 School Inventory System. All rights reserved.</p>
+    </footer>
+
+    <script src="{% static 'js/inventory.js' %}"></script>
+    <script src="{% static 'js/events.js' %}"></script>
+</body>
+</html>

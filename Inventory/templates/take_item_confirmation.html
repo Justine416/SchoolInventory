@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Item Taken Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        h1 {
+            color: #4CAF50;
+            font-size: 2em;
+            margin-top: 50px;
+        }
+        p {
+            font-size: 1.2em;
+            margin: 20px;
+        }
+        a {
+            text-decoration: none;
+            font-size: 1.1em;
+            color: #ffffff;
+            background-color: #4CAF50;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+            display: inline-block;
+        }
+        a:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Confirmation</h1>
+    <p>You have successfully taken {{ quantity }} of {{ item.name }}.</p>
+    <a href="{% url 'inventory' %}">Return to Inventory List</a>
+</body>
+</html>

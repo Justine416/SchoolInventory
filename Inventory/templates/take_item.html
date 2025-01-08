@@ -1,0 +1,79 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Take Item</title>
+    <link rel="stylesheet" href="{% static 'css/item.css' %}">
+</head>
+<body>
+    <nav>
+
+         <ul>
+            <li><a href="{% url 'home' %}">Home</a></li>
+            <li><a href="{% url 'inventory' %}">View Inventory</a></li>
+            <li><a href="{% url 'add_item' %}">Add Item</a></li>
+            <li><a href="{% url 'transaction_list' %}">Transaction</a></li>
+            <li><a href="{% url 'manage_inventory' %}">Manage Inventory</a></li>
+            <li><a href="{% url 'take_item' %}?action=take">Take Item</a></li>
+            <li><a href="{% url 'return_item' %}?action=return">Return Item</a></li>
+        </ul>
+    </nav>
+
+    <h1>Take an Item</h1>
+    <form method="post" id="take-item-form">
+        {% csrf_token %}
+        <label for="user_name">Your Name:</label>
+        <input type="text" name="user_name" required><br>
+
+        <label for="item_id">Item:</label>
+        <select name="item_id">
+            {% for item in items %}
+            <option value="{{ item.id }}">{{ item.name }}</option>
+            {% endfor %}
+        </select><br>
+
+        <label for="quantity">Quantity:</label>
+        <div class="quantity-control">
+            <button type="button" class="quantity-btn" id="decrease">-</button>
+            <input type="number" name="quantity" id="quantity" value="1" min="1" required>
+            <button type="button" class="quantity-btn" id="increase">+</button>
+        </div><br>
+
+        <label for="date">Date:</label>
+        <input type="date" name="date" required><br>
+
+        <button type="submit" class="submit-btn">Take</button>
+    </form>
+
+    <div id="confirmation" style="display: none;">
+        <p>Item has been successfully taken! Thank you.</p>
+    </div>
+
+
+
+   <script>
+    // Redirect the user to the desired page on form submission
+    document.getElementById("take-item-form").addEventListener("submit", function(event) {
+        event.preventDefault(); // Prevent the form submission
+        window.location.href = "{% url 'take_item' %}";
+    });
+
+    // Quantity control buttons
+    const quantityInput = document.getElementById('quantity');
+    const increaseButton = document.getElementById('increase');
+    const decreaseButton = document.getElementById('decrease');
+
+    increaseButton.addEventListener('click', () => {
+        quantityInput.value = parseInt(quantityInput.value) + 1;
+    });
+
+    decreaseButton.addEventListener('click', () => {
+        if (quantityInput.value > 1) {
+            quantityInput.value = parseInt(quantityInput.value) - 1;
+        }
+    });
+</script>
+
+</body>
+</html>

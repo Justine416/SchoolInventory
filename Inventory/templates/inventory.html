@@ -1,0 +1,251 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Inventory</title>
+  <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: coral; /* Matching coral background */
+            color: #333;
+            background-image: url("{% static 'item_images/img.png' %}");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        nav {
+            background-color: rgba(44, 62, 80, 0.9);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            text-align: center;
+        }
+
+        nav ul li {
+            display: inline-block;
+            margin-right: 20px;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
+            padding: 12px 18px;
+            border-radius: 5px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        nav ul li a:hover {
+            background-color: #3498db; /* Light blue on hover */
+            transform: scale(1.1);
+        }
+
+        a:hover {
+            transform: scale(1.05); /* Slight zoom effect for links */
+            color: #f39c12; /* Coral on hover */
+        }
+
+        h1 {
+            text-align: center;
+            color: #fff;
+            font-size: 2.5em;
+            margin-top: 40px;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: coral;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .back-button {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: coral; /* Matching coral color */
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .back-button:hover {
+            color: #FFB86C; /* Light coral color for hover */
+        }
+
+        .take-button {
+            background-color: coral; /* Matching coral color */
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        .take-button:hover {
+            background-color: #FFB86C; /* Light coral color for hover */
+        }
+
+        /* Style for the confirmation popup */
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .popup-box {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 300px;
+            text-align: center;
+        }
+
+        .popup-box button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #FF6347;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .popup-box button:hover {
+            background-color: #FF4500;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="{% url 'home' %}">Home</a></li>
+            <li><a href="{% url 'inventory' %}">View Inventory</a></li>
+            <li><a href="{% url 'add_item' %}">Add Item</a></li>
+            <li><a href="{% url 'transaction_list' %}">Transaction</a></li>
+            <li><a href="{% url 'manage_inventory' %}">Manage Inventory</a></li>
+            <li><a href="{% url 'take_item' %}?action=take">Take Item</a></li>
+            <li><a href="{% url 'return_item' %}?action=return">Return Item</a></li>
+        </ul>
+    </nav>
+    <h1>Inventory</h1>
+
+    <!-- Inventory table -->
+    <table id="inventoryTable">
+        <thead>
+            <tr>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Quantity</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="inventoryTableBody">
+            <!-- Inventory items will be dynamically inserted here -->
+        </tbody>
+    </table>
+
+    <a href="{% url 'home' %}" class="back-button">Back to Home</a>
+
+    <!-- Confirmation Popup -->
+    <div id="popup-overlay" class="popup-overlay">
+        <div class="popup-box">
+            <p>Are you sure you want to take this item?</p>
+            <button id="confirm-take" onclick="confirmTakeItem()">Yes, Take Item</button>
+            <button id="cancel-take" onclick="closePopup()">Cancel</button>
+        </div>
+    </div>
+
+    <script src="{% static 'js/data.js' %}"></script>
+
+    <script>
+        let itemToTake = null;
+
+        // Function to load inventory from the static data.js file
+        function loadInventory() {
+            const inventoryTableBody = document.getElementById('inventoryTableBody');
+            inventoryTableBody.innerHTML = '';
+
+            // Loop through each item and create a table row
+            inventoryData.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><img src="${item.image_url}" alt="${item.name}"></td>
+                    <td>${item.name}</td>
+                    <td>${item.quantity}</td>
+                    <td>
+                        <button class="take-button" onclick="showTakePopup(${item.id}, '${item.name}', ${item.quantity})">Take Item</button>
+                    </td>
+                `;
+                inventoryTableBody.appendChild(row);
+            });
+        }
+
+        // Function to show the popup and set the item to take
+        function showTakePopup(itemId, itemName, itemQuantity) {
+            itemToTake = { id: itemId, name: itemName, quantity: itemQuantity };
+            document.getElementById('popup-overlay').style.display = 'flex';
+        }
+
+        // Function to close the popup
+        function closePopup() {
+            document.getElementById('popup-overlay').style.display = 'none';
+        }
+
+        // Function to confirm taking the item
+        function confirmTakeItem() {
+            const url = `{% url 'take_item' %}?item_id=${itemToTake.id}&item_name=${encodeURIComponent(itemToTake.name)}&item_quantity=${itemToTake.quantity}`;
+            window.location.href = url;
+            closePopup();
+        }
+
+        // Event listener to reload the inventory when the page is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            loadInventory();
+        });
+    </script>
+
+</body>
+</html>
