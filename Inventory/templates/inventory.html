@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Inventory</title>
+
+    <link rel="icon" href="{% static 'item_images/favicon.png' %}" type="image/x-icon">
   <style>
         body {
             font-family: Arial, sans-serif;
@@ -170,82 +172,50 @@
             <li><a href="{% url 'return_item' %}?action=return">Return Item</a></li>
         </ul>
     </nav>
-    <h1>Inventory</h1>
+<h1>Inventory</h1>
+<table id="inventoryTable">
+    <thead>
+        <tr>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Quantity</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Data will be loaded dynamically here -->
+    </tbody>
+</table>
 
-    <!-- Inventory table -->
-    <table id="inventoryTable">
-        <thead>
-            <tr>
-                <th>Image</th>
-                <th>Name</th>
-                <th>Quantity</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody id="inventoryTableBody">
-            <!-- Inventory items will be dynamically inserted here -->
-        </tbody>
-    </table>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    <a href="{% url 'home' %}" class="back-button">Back to Home</a>
+<script>
+    $(document).ready(function () {
+        // Load inventory data via AJAX
+        loadInventoryData();
 
-    <!-- Confirmation Popup -->
-    <div id="popup-overlay" class="popup-overlay">
-        <div class="popup-box">
-            <p>Are you sure you want to take this item?</p>
-            <button id="confirm-take" onclick="confirmTakeItem()">Yes, Take Item</button>
-            <button id="cancel-take" onclick="closePopup()">Cancel</button>
-        </div>
-    </div>
-
-    <script src="{% static 'js/data.js' %}"></script>
-
-    <script>
-        let itemToTake = null;
-
-        // Function to load inventory from the static data.js file
-        function loadInventory() {
-            const inventoryTableBody = document.getElementById('inventoryTableBody');
-            inventoryTableBody.innerHTML = '';
-
-            // Loop through each item and create a table row
-            inventoryData.forEach(item => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td><img src="${item.image_url}" alt="${item.name}"></td>
-                    <td>${item.name}</td>
-                    <td>${item.quantity}</td>
-                    <td>
-                        <button class="take-button" onclick="showTakePopup(${item.id}, '${item.name}', ${item.quantity})">Take Item</button>
-                    </td>
-                `;
-                inventoryTableBody.appendChild(row);
+        function loadInventoryData() {
+            $.ajax({
+                url: '/api/inventory/',  // This is the endpoint that returns the data
+                method: 'GET',
+                success: function (response) {
+                    var tableBody = $('#inventoryTable tbody');
+                    tableBody.empty();  // Clear any existing rows
+                    $.each(response.items, function (index, item) {
+                        var row = '<tr>' +
+                                    '<td><img src="' + item.image_url + '" alt="' + item.name + '" width="100" height="100"></td>' +
+                                    '<td>' + item.name + '</td>' +
+                                    '<td>' + item.quantity + '</td>' +
+                                  '</tr>';
+                        tableBody.append(row);
+                    });
+                },
+                error: function () {
+                    alert("Failed to load inventory data.");
+                }
             });
         }
-
-        // Function to show the popup and set the item to take
-        function showTakePopup(itemId, itemName, itemQuantity) {
-            itemToTake = { id: itemId, name: itemName, quantity: itemQuantity };
-            document.getElementById('popup-overlay').style.display = 'flex';
-        }
-
-        // Function to close the popup
-        function closePopup() {
-            document.getElementById('popup-overlay').style.display = 'none';
-        }
-
-        // Function to confirm taking the item
-        function confirmTakeItem() {
-            const url = `{% url 'take_item' %}?item_id=${itemToTake.id}&item_name=${encodeURIComponent(itemToTake.name)}&item_quantity=${itemToTake.quantity}`;
-            window.location.href = url;
-            closePopup();
-        }
-
-        // Event listener to reload the inventory when the page is loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            loadInventory();
-        });
-    </script>
+    });
+</script>
 
 </body>
 </html>

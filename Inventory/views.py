@@ -19,13 +19,16 @@ def is_admin(user):
 
 
 
-def manage_inventory(request):
-    inventory = Item.objects.all()  # Fetch all items from the database
-    return render(request, 'manage_inventory.html', {'inventory': inventory})
 
 def inventory(request):
+    # Fetch inventory data from the database or use static data
     items = Item.objects.all()
     return render(request, 'inventory.html', {'items': items})
+
+def manage_inventory(request):
+    # Fetch inventory data for managing
+    items = Item.objects.all()
+    return render(request, 'manage_inventory.html', {'items': items})
 
 def add_item(request):
     if request.method == 'POST':
@@ -174,32 +177,18 @@ def return_item(request):
 def home(request):
     return render(request, 'home.html')  # Render home.html template
 
-
-from django.shortcuts import render
-from django.http import JsonResponse
-from .models import Item
-
-
 def get_inventory(request):
-    # Fetch all items
-    inventory = Item.objects.all()
+    items = Item.objects.all()
+    data = []
+    for item in items:
+        data.append({
+            'id': item.id,
+            'name': item.name,
+            'image_url': item.image.url if item.image else '',  # Check if item has an image
+            'quantity': item.count,
+        })
+    return JsonResponse({'items': data})
 
-
-    data = [
-        {
-            "image": item.image.url if item.image else '',
-            "name": item.name,
-            "quantity": item.count
-        }
-        for item in inventory
-    ]
-
-
-    if request.is_ajax():
-        return JsonResponse(data, safe=False)
-
-
-    return render(request, 'inventory.html', {'inventory_data': data})
 
 def edit_item(request, item_id):
     item = get_object_or_404(Item, pk=item_id)
@@ -213,6 +202,8 @@ def delete_item(request, item_id):
 
     if request.method == 'POST':
         item.delete()
-        return JsonResponse({'success': True})
+        # Redirect to manage_inventory page after deletion
+        return redirect('manage_inventory')  # Ensure 'manage_inventory' is the name of the URL pattern
 
-    return JsonResponse({'success': False}, status=400)
+    # Handle invalid request method
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
