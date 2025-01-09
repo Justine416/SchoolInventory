@@ -7,6 +7,7 @@
 
     <link rel="icon" href="{% static 'item_images/favicon.png' %}" type="image/x-icon">
     <style>
+        /* Styles */
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
@@ -52,11 +53,10 @@
             transform: scale(1.1);
         }
 
-          a:hover {
+        a:hover {
             transform: scale(1.05); /* Slight zoom effect for links */
             color: #f39c12; /* Coral on hover */
         }
-
 
         h1 {
             text-align: center;
@@ -109,87 +109,101 @@
 </head>
 <body>
 
-   <!-- Navigation Bar -->
-  <nav>
-        <ul>
-            <li><a href="{% url 'home' %}">Home</a></li>
-            <li><a href="{% url 'inventory' %}">View Inventory</a></li>
-            <li><a href="{% url 'add_item' %}">Add Item</a></li>
-            <li><a href="{% url 'transaction_list' %}">Transaction</a></li>
-            <li><a href="{% url 'manage_inventory' %}">Manage Inventory</a></li>
-            <li><a href="{% url 'take_item' %}?action=take">Take Item</a></li>
-            <li><a href="{% url 'return_item' %}?action=return">Return Item</a></li>
-        </ul>
-    </nav>
-    <!-- Heading -->
-    <h1>Return an Item</h1>
+<!-- Navigation Bar -->
+<nav>
+    <ul>
+        <li><a href="{% url 'home' %}">Home</a></li>
+        <li><a href="{% url 'inventory' %}">View Inventory</a></li>
+        <li><a href="{% url 'add_item' %}">Add Item</a></li>
+        <li><a href="{% url 'transaction_list' %}">Transaction</a></li>
+        <li><a href="{% url 'manage_inventory' %}">Manage Inventory</a></li>
+        <li><a href="{% url 'take_item' %}?action=take">Take Item</a></li>
+        <li><a href="{% url 'return_item' %}?action=return">Return Item</a></li>
+    </ul>
+</nav>
 
-    <!-- Form Section -->
-    <form method="post">
-        {% csrf_token %}
+<!-- Heading -->
+<h1>Return an Item</h1>
 
-        <!-- Name Input -->
-        <div>
-            <label for="user_name">Your Name:</label>
-            <input type="text" name="user_name" required>
-        </div>
+<!-- Form Section -->
+<form method="post" id="return-form">
+    {% csrf_token %}
 
-        <!-- Item Selection -->
-        <div>
-            <label for="item_id">Item:</label>
-            <select name="item_id">
-                {% for item in items %}
-                <option value="{{ item.id }}">{{ item.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
+    <!-- Name Input -->
+    <div>
+        <label for="user_name">Your Name:</label>
+        <input type="text" name="user_name" required>
+    </div>
 
-        <!-- Quantity Input -->
-        <div>
-            <label for="quantity">Quantity:</label>
-            <input type="number" name="quantity" required>
-        </div>
+    <!-- Item Selection -->
+    <div>
+        <label for="item_id">Item:</label>
+        <select name="item_id">
+            {% for item in items %}
+            <option value="{{ item.id }}">{{ item.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
 
-        <!-- Date Input -->
-        <div>
-            <label for="date">Date:</label>
-            <input type="date" name="date" required>
-        </div>
+    <!-- Quantity Input -->
+    <div>
+        <label for="quantity">Quantity:</label>
+        <input type="number" name="quantity" required min="1">
+    </div>
 
-        <!-- Submit Button -->
-        <button type="submit">Return</button>
-    </form>
+    <!-- Date Input -->
+    <div>
+        <label for="date">Date:</label>
+        <input type="date" name="date" required>
+    </div>
 
-    <!-- JavaScript for handling form submission and popup -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const form = document.querySelector("form");
+    <!-- Submit Button -->
+    <button type="submit">Return</button>
+</form>
 
-            form.addEventListener("submit", function(event) {
-                event.preventDefault();
+<!-- JavaScript for handling form submission and popup -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const form = document.querySelector("#return-form");
 
-                // Gather form data
-                const userName = document.querySelector("input[name='user_name']").value;
-                const itemId = document.querySelector("select[name='item_id']").value;
-                const quantity = document.querySelector("input[name='quantity']").value;
-                const date = document.querySelector("input[name='date']").value;
+        form.addEventListener("submit", function(event) {
+            event.preventDefault();  // Prevent form submission
 
-                // Check if all fields are filled out
-                if (userName && itemId && quantity && date) {
-                    // Assuming the return item request is successful:
-                    alert(`Item returned successfully!\nItem: ${itemId}\nQuantity: ${quantity}\nDate: ${date}\nThank you, ${userName}!`);
+            const userName = document.querySelector("input[name='user_name']").value;
+            const itemId = document.querySelector("select[name='item_id']").value;
+            const quantity = document.querySelector("input[name='quantity']").value;
+            const date = document.querySelector("input[name='date']").value;
 
-                    // Redirect to index page after the popup message
-                    window.location.href = "{% url 'home' %}";
-                } else {
-                    alert("Please fill in all fields.");
-                }
-            });
+            // Check if all fields are filled out
+            if (userName && itemId && quantity && date) {
+                // Send data to server for processing
+                const xhr = new XMLHttpRequest();
+                xhr.open("POST", "{% url 'return_item' %}", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.setRequestHeader("X-CSRFToken", document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        // Assuming the backend returns success:
+                        alert(`Item returned successfully!\nItem: ${itemId}\nQuantity: ${quantity}\nDate: ${date}\nThank you, ${userName}!`);
+
+                        // Redirect to home page after success
+                        window.location.href = "{% url 'home' %}";
+                    } else {
+                        alert("There was an error processing the return. Please try again.");
+                    }
+                };
+
+                xhr.send(`user_name=${userName}&item_id=${itemId}&quantity=${quantity}&date=${date}`);
+            } else {
+                alert("Please fill in all fields.");
+            }
         });
-    </script>
+    });
+</script>
 
-    <script src="{% static 'js/inventory.js' %}"></script>
-    <script src="{% static 'js/events.js' %}"></script>
+<script src="{% static 'js/inventory.js' %}"></script>
+<script src="{% static 'js/events.js' %}"></script>
 
 </body>
 </html>

@@ -103,41 +103,44 @@ def transaction_list(request):
 
 
 @csrf_exempt
-
 def take_item(request):
-    message = None  # To store success or error message
     if request.method == 'POST':
-        try:
-            item_id = request.POST.get('item_id')
-            quantity_taken = int(request.POST.get('quantity'))
+        # Get data from the form
+        user_name = request.POST['user_name']
+        item_id = request.POST['item_id']
+        quantity = int(request.POST['quantity'])
+        date = request.POST['date']
 
-            # Fetch the item from the database
-            item = Item.objects.get(id=item_id)
+        # Find the item being taken
+        item = Item.objects.get(id=item_id)
 
-            # Ensure there are enough items to take
-            if item.count >= quantity_taken:
-                # Update the quantity
-                item.count -= quantity_taken
-                item.save()
-                message = "Item taken successfully!"
-            else:
-                message = "Not enough stock available."
+        # Check if enough quantity is available
+        if item.count >= quantity:  # Use item.count instead of item.stock
+            # Process the transaction
+            item.count -= quantity  # Reduce the inventory count
+            item.save()
 
-        except Item.DoesNotExist:
-            message = "Item not found."
+            # Create a new transaction record
+            transaction = Transaction(
+                user_name=user_name,
+                item=item,
+                quantity=quantity,
+                date=date,
+                action='take'  # You can define whether it's a 'take' or 'return'
+            )
+            transaction.save()
 
-        except ValueError:
-            message = "Invalid quantity entered."
+            # Add a success message for the user
+            messages.success(request, f'{quantity} {item.name}(s) successfully taken!')
 
-        except Exception as e:
-            message = f"An error occurred: {str(e)}"
+            # Redirect to a confirmation page or reload the page
+            return redirect('transaction_list')
+        else:
+            # Show an error if there is not enough stock
+            messages.error(request, 'Not enough stock available for this item.')
 
-    items = Item.objects.all()
-    return render(request, 'take_item.html', {'items': items, 'message': message})
-
-
-
-
+    items = Item.objects.all()  # Retrieve all items for the form
+    return render(request, 'take_item.html', {'items': items})
 
 
 def return_item(request):
@@ -154,11 +157,14 @@ def return_item(request):
 
         quantity = int(quantity)
 
+        # Find the item being returned
         item = get_object_or_404(Item, id=item_id)
+
+        # Update the stock count of the item
         item.count += quantity
         item.save()
 
-        # Record the transaction
+        # Record the return transaction
         Transaction.objects.create(
             item=item,
             quantity=quantity,
@@ -167,11 +173,18 @@ def return_item(request):
             date=date
         )
 
+        # Success message
         messages.success(request, f'{quantity} {item.name}(s) returned successfully.')
-        return redirect('transaction')
+
+        # Clear transaction table (optional)
+        # Transaction.objects.filter(action='return', item=item, quantity=quantity).delete()  # Uncomment if you want to delete it after return
+
+        return redirect('transaction_list')
 
     items = Item.objects.all()
     return render(request, 'return_item.html', {'items': items})
+
+
 
 
 def home(request):

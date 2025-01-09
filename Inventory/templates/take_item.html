@@ -53,29 +53,33 @@
     </div>
 
 
+    <script>
+document.getElementById('takeItemForm').addEventListener('submit', function(event) {
+    event.preventDefault();  // Prevent form submission
 
-   <script>
-    // Redirect the user to the desired page on form submission
-    document.getElementById("take-item-form").addEventListener("submit", function(event) {
-        event.preventDefault(); // Prevent the form submission
-        window.location.href = "{% url 'take_item' %}";
-    });
-
-    // Quantity control buttons
-    const quantityInput = document.getElementById('quantity');
-    const increaseButton = document.getElementById('increase');
-    const decreaseButton = document.getElementById('decrease');
-
-    increaseButton.addEventListener('click', () => {
-        quantityInput.value = parseInt(quantityInput.value) + 1;
-    });
-
-    decreaseButton.addEventListener('click', () => {
-        if (quantityInput.value > 1) {
-            quantityInput.value = parseInt(quantityInput.value) - 1;
+    const form = new FormData(this);
+    fetch('{% url "take_item" %}', {
+        method: 'POST',
+        body: form,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
         }
+    })
+    .then(response => response.json())
+    .then(data => {
+        // After a successful transaction, you can dynamically update the table
+        if (data.success) {
+            // Append the new transaction to the table or reload the transaction list
+            location.reload();  // Or, update the table without reloading
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
     });
-</script>
+});
 
+</script>
 </body>
 </html>
